@@ -1,0 +1,100 @@
+/*
+ * A very simple "Hello, World!" workload
+ */
+
+// this is just one of the simplest workloads that can produce hits
+// never use this workload for benchmarking
+
+
+// SimpleContent defines properties of content that the server generates;
+// if you get no hits, set SimpleContent.obj_life_cycle to cntStatic, which
+// is defined in workloads/include/contents.pg
+
+Content SimpleContent = {
+        size = const(64KB);
+       content_db  = "/home/tejaswi.chunduri/Box_teja.cdb";
+       cachable = 80%;   // 20% of content is uncachable
+};
+
+DnsResolver dr = {
+    servers = [ '10.0.15.60:53' ];
+    timeout = 5sec;
+};
+
+SslWrap wrap = {
+        protocols = [ "any" ];
+        root_certificate = "/home/srangan/boxcom.pem";
+	//ciphers = [ "ALL:HIGH:" : 100% ];
+	ciphers = [ "ALL:!DES-CBC-SHA:!EXP-DES-CBC-SHA:!EXP-RC4-MD5:!EXP-RC2-CBC-MD5:" : 100% ];
+
+        rsa_key_sizes = [ 512bit, 1024bit, 2048bit ];
+        session_resumption = 40%;
+        session_cache = 100;
+	verify_peer_certificate = false;	
+};
+
+// a primitive server cleverly labeled "S101"
+// normally, you would specify more properties,
+// but we will mostly rely on defaults for now
+Server S = {
+	kind = "S101"; 
+	contents = [ SimpleContent ];
+	direct_access = contents;
+
+	addresses = ['10.0.15.60:443' ]; // where to create these server agents
+	ssl_wraps = [ wrap ];
+        
+};
+
+// a primitive robot
+Robot R = {
+	kind = "R101";
+
+	interests = [ "foreign" ];
+//	foreign_trace = "/home/krishna/perftest_tools/testgdoc,DownloadFIle.log";
+//	foreign_trace = "/home/krishna/perf/test-logs/box-share/newfile11.txt,noemail@elastica.net,Share.log";
+//	foreign_trace = "/home/krishna/perf/test-logs/Box/2014.09.01/file1111.txt,Upload.log";
+        foreign_trace = "/home/tejaswi.chunduri/Box_download_request.log";
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = S.addresses;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+
+        MimeHeader user1 = 'ELASTICA_MAGIC_COOKIE: 666923300190:stresstest.user1@elastica.co';
+        MimeHeader Host = 'Host: dl.boxcloud.com';
+	MimeHeader User-Agent = 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:40.0) Gecko/20100101 Firefox/40.0';
+	MimeHeader Accept = 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
+	MimeHeader Accept-Language = 'Accept-Language: en-US,en;q=0.5';
+	MimeHeader Accept-Encoding = 'Accept-Encoding: gzip, deflate';
+	MimeHeader Referer = 'Referer: https://elasticaqa1.app.box.com/files/0/f/0';
+	MimeHeader x-elastica_gw = 'x-elastica_gw: v1.0.1';
+	MimeHeader el_auth_param = 'el_auth_param: RU5DOvqpGlsshewFvaN2YakssFqLeU4ZWXXXy8v2dzVQfjUySz8QXKGB039xDIHhMQWEP3FESPQgtJppp886cGBpV17uDgvhTC546okl$';
+	MimeHeader Content-Length = 'Content-Length: 0';
+
+	 http_headers = [user1: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+	req_rate = 0.1/sec;
+};
+
+// a 1:1 map
+AddrMap M = {
+    //names = [ 'www.box.com' ];
+    addresses = [ '10.0.15.60:80', '10.0.15.60:443' ];
+   //addresses = S.addresses;
+   // names = tracedHosts(R.foreign_trace);
+};
+
+Phase phRampUp = { name = "rampup"; goal.duration = 10sec; populus_factor_beg = 0; populus_factor_end = 1;};
+Phase phRampDown = { name = "rampdown"; goal.duration = 10sec; populus_factor_beg = 1; populus_factor_end = 0;};
+Phase phSustain = { name = "sustain"; goal.duration = 60min; populus_factor_beg = 1; populus_factor_end = 1;};
+
+
+// build schedule using some well-known phases and phases defined above
+schedule(phRampUp, 
+         phSustain); 
+
+
+
+use(M);
+use(S, R);

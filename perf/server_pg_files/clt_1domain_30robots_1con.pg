@@ -1,0 +1,399 @@
+
+/*
+ * Multi users using multiple robots
+ */
+
+
+// SimpleContent defines properties of content that the server generates;
+// if you get no hits, set SimpleContent.obj_life_cycle to cntStatic, which
+// is defined in workloads/include/contents.pg
+Content SimpleContent = {
+        size = exp(64KB); // response sizes distributed constantly
+        //size = const(6Byte);
+        cachable = 80%;   // 20% of content is uncachable
+};
+
+
+AddrMap map = {
+           addresses = [ '10.0.15.60:443' ];
+           names = [ 'www.dropbox.com'];
+};
+
+use (map);
+
+
+DnsResolver dr = {
+    servers = [ '10.0.15.60:53' ];
+    timeout = 5sec;
+};
+
+
+SslWrap wrap = {
+        protocols = [ "any" ];
+        ciphers = [ "ALL:!DES-CBC-SHA:!EXP-DES-CBC-SHA:!EXP-RC4-MD5:!EXP-RC2-CBC-MD5:" : 100% ];
+
+        rsa_key_sizes = [ 512bit, 1024bit, 2048bit ];
+        session_resumption = 40%;
+        session_cache = 100;
+        verify_peer_certificate = false;
+};
+
+
+// a primitive server cleverly labeled "S101"
+// normally, you would specify more properties,
+// but we will mostly rely on defaults for now
+Server S = {
+	kind = "S101";
+	contents = [ SimpleContent ];
+	direct_access = contents;
+	addresses = ['10.0.15.60:443' ]; // where to create these server agents
+	ssl_wraps = [ wrap ];
+};
+
+
+Phase phRampUp = { name = "rampup"; goal.duration = 5min; populus_factor_beg = 0; populus_factor_end = 1;};
+Phase phRampDown = { name = "rampdown"; goal.duration = 5min; populus_factor_beg = 1; populus_factor_end = 0;};
+Phase phSustain = { name = "sustain"; goal.duration = 60min; populus_factor_beg = 1; populus_factor_end = 1;};
+
+// build schedule using some well-known phases and phases defined above
+//schedule(phRampUp,
+//         phSustain,
+//         phRampDown);
+
+schedule(phRampUp,
+         phSustain);
+
+// robots
+
+Robot R1 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R2 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R3 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R4 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R5 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R6 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R7 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R8 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R9 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R10 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R11 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R12 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R13 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R14 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R15 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R16 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R17 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R18 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R19 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R20 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R21 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R22 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R23 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R24 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R25 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R26 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R27 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R28 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R29 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R30 = {
+
+        pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        credentials = [ "tejaswi.chunduri@bluecoat.com@:Admin@123" ];
+	
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+// commit to using these servers and robots
+use(S,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,R14,R15,R16,R17,R18,R19,R20,R21,R22,R23,R24,R25,R26,R27,R28,R29,R30);

@@ -1,0 +1,96 @@
+/*
+ * A very simple "Hello, World!" workload
+ */
+
+// this is just one of the simplest workloads that can produce hits
+// never use this workload for benchmarking
+
+
+// SimpleContent defines properties of content that the server generates;
+// if you get no hits, set SimpleContent.obj_life_cycle to cntStatic, which
+// is defined in workloads/include/contents.pg
+Content SimpleContent = {
+	size = exp(1Byte); // response sizes distributed exponentially
+	cachable = 80%;   // 20% of content is uncachable
+};
+
+
+AddrMap map = {
+           addresses = [ '10.0.15.60:443' ];
+           names = [ 'www.dropbox.com'];
+};
+
+use (map);
+
+
+DnsResolver dr = {
+    servers = [ '10.0.15.60:53' ];
+    timeout = 5sec;
+};
+
+
+SslWrap wrap = {
+        protocols = [ "any" ];
+        ciphers = [ "ALL:!DES-CBC-SHA:!EXP-DES-CBC-SHA:!EXP-RC4-MD5:!EXP-RC2-CBC-MD5:" : 100% ];
+
+        rsa_key_sizes = [ 512bit, 1024bit, 2048bit ];
+        session_resumption = 40%;
+        session_cache = 100;
+        verify_peer_certificate = false;
+};
+
+
+// a primitive server cleverly labeled "S101"
+// normally, you would specify more properties,
+// but we will mostly rely on defaults for now
+Server S = {
+	kind = "S101"; 
+	contents = [ SimpleContent ];
+	direct_access = contents;
+
+	addresses = ['10.0.15.60:443' ]; // where to create these server agents
+	ssl_wraps = [ wrap ];
+	MimeHeader header1 = 'Connection: keep-alive';
+        MimeHeader header2 = 'Proxy-Connection: keep-alive';
+        http_headers = [header1: 100%, header2:100%];
+	pconn_use_lmt = const(2147483647); // Persistent connections - should tune this value
+        idle_pconn_tout = 60min;
+};
+
+// a primitive robot
+Robot R0 = {
+	//kind = "R101";
+	//pop_model = { pop_distr = popUnif(); };
+        req_methods = ["HEAD"];
+	req_rate = 2/1min;
+	//recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        MimeHeader header1 = 'Connection: keep-alive';
+        MimeHeader header2 = 'Proxy-Connection: keep-alive';
+        http_headers = [header1: 100%, header2:100%];	
+        pconn_use_lmt = const(2147483647); // Persistent connections - should tune this value
+        idle_pconn_tout = 60min;
+        origins = map.names;      // where the origin servers are
+	addresses = ['10.0.15.105' ** 1 ]; // where these robot agents will be created
+        dns_resolver = dr;
+	ssl_wraps = [ wrap ];
+};
+
+Robot R1 = {
+        kind = "R101";
+        pop_model = { pop_distr = popUnif(); };
+        req_methods = ["HEAD"];
+        req_rate = 4/1min;
+        //recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        MimeHeader header1 = 'Connection: keep-alive';
+        MimeHeader header2 = 'Proxy-Connection: keep-alive';
+        http_headers = [header1: 100%, header2:100%];
+        pconn_use_lmt = const(2147483647); // Persistent connections - should tune this value
+        //idle_pconn_tout = 60 min;
+        origins = map.names;      // where the origin servers are
+        addresses = ['10.0.15.105' ** 1 ]; // where these robot agents will be created
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+};
+
+// commit to using these servers and robots
+use(S, R0); //,R1);

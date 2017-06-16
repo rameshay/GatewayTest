@@ -1,0 +1,769 @@
+
+/*
+ * Multi users using multiple robots
+ */
+
+
+// SimpleContent defines properties of content that the server generates;
+// if you get no hits, set SimpleContent.obj_life_cycle to cntStatic, which
+// is defined in workloads/include/contents.pg
+Content SimpleContent = {
+        size = const(20MB); // response sizes distributed constantly
+        //size = const(6Byte);
+        cachable = 80%;   // 20% of content is uncachable
+};
+
+
+AddrMap map = {
+           addresses = [ '10.0.15.60:443' ];
+           names = [ 'www.dropbox.com'];
+};
+
+use (map);
+
+
+DnsResolver dr = {
+    servers = [ '10.0.15.60:53' ];
+    timeout = 5sec;
+};
+
+
+SslWrap wrap = {
+        protocols = [ "any" ];
+        ciphers = [ "ALL:!DES-CBC-SHA:!EXP-DES-CBC-SHA:!EXP-RC4-MD5:!EXP-RC2-CBC-MD5:" : 100% ];
+
+        rsa_key_sizes = [ 512bit, 1024bit, 2048bit ];
+        session_resumption = 40%;
+        session_cache = 100;
+        verify_peer_certificate = false;
+};
+
+
+// a primitive server cleverly labeled "S101"
+// normally, you would specify more properties,
+// but we will mostly rely on defaults for now
+Server S = {
+	kind = "S101";
+	contents = [ SimpleContent ];
+	direct_access = contents;
+	addresses = ['10.0.15.60:443' ]; // where to create these server agents
+	ssl_wraps = [ wrap ];
+};
+
+
+Phase phRampUp = { name = "rampup"; goal.duration = 5min; populus_factor_beg = 0; populus_factor_end = 1;};
+Phase phRampDown = { name = "rampdown"; goal.duration = 5min; populus_factor_beg = 1; populus_factor_end = 0;};
+Phase phSustain = { name = "sustain"; goal.duration = 60min; populus_factor_beg = 1; populus_factor_end = 1;};
+
+// build schedule using some well-known phases and phases defined above
+//schedule(phRampUp,
+//         phSustain,
+//         phRampDown);
+
+schedule(phRampUp,
+         phSustain);
+
+// robots
+
+Robot R1 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user1 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user1@elastica.co';
+        http_headers = [user1: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R2 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user2 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user2@elastica.co';
+        http_headers = [user2: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R3 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user3 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user3@elastica.co';
+        http_headers = [user3: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R4 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user4 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user4@elastica.co';
+        http_headers = [user4: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R5 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user5 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user5@elastica.co';
+        http_headers = [user5: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R6 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user6 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user6@elastica.co';
+        http_headers = [user6: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R7 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user7 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user7@elastica.co';
+        http_headers = [user7: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R8 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user8 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user8@elastica.co';
+        http_headers = [user8: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R9 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user9 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user9@elastica.co';
+        http_headers = [user9: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R10 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user10 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user10@elastica.co';
+        http_headers = [user10: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R11 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user11 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user11@elastica.co';
+        http_headers = [user11: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R12 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user12 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user12@elastica.co';
+        http_headers = [user12: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R13 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user13 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user13@elastica.co';
+        http_headers = [user13: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R14 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user14 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user14@elastica.co';
+        http_headers = [user14: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R15 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user15 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user15@elastica.co';
+        http_headers = [user15: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R16 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user16 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user16@elastica.co';
+        http_headers = [user16: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R17 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user17 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user17@elastica.co';
+        http_headers = [user17: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R18 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user18 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user18@elastica.co';
+        http_headers = [user18: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R19 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user19 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user19@elastica.co';
+        http_headers = [user19: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R20 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user20 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user20@elastica.co';
+        http_headers = [user20: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R21 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user21 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user21@elastica.co';
+        http_headers = [user21: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R22 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user22 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user22@elastica.co';
+        http_headers = [user22: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R23 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user23 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user23@elastica.co';
+        http_headers = [user23: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R24 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user24 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user24@elastica.co';
+        http_headers = [user24: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R25 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user25 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user25@elastica.co';
+        http_headers = [user25: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R26 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user26 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user26@elastica.co';
+        http_headers = [user26: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R27 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user27 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user27@elastica.co';
+        http_headers = [user27: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R28 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user28 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user28@elastica.co';
+        http_headers = [user28: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R29 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user29 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user29@elastica.co';
+        http_headers = [user29: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R30 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user30 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user30@elastica.co';
+        http_headers = [user30: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R31 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user31 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user31@elastica.co';
+        http_headers = [user31: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R32 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user32 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user32@elastica.co';
+        http_headers = [user32: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R33 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user33 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user33@elastica.co';
+        http_headers = [user33: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R34 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user34 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user34@elastica.co';
+        http_headers = [user34: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R35 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user35 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user35@elastica.co';
+        http_headers = [user35: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R36 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user36 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user36@elastica.co';
+        http_headers = [user36: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R37 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user37 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user37@elastica.co';
+        http_headers = [user37: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R38 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user38 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user38@elastica.co';
+        http_headers = [user38: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R39 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user39 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user39@elastica.co';
+        http_headers = [user39: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R40 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user40 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user40@elastica.co';
+        http_headers = [user40: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R41 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user41 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user41@elastica.co';
+        http_headers = [user41: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R42 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user42 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user42@elastica.co';
+        http_headers = [user42: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R43 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user43 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user43@elastica.co';
+        http_headers = [user43: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R44 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user44 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user44@elastica.co';
+        http_headers = [user44: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R45 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user45 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user45@elastica.co';
+        http_headers = [user45: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R46 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user46 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user46@elastica.co';
+        http_headers = [user46: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R47 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user47 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user47@elastica.co';
+        http_headers = [user47: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R48 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user48 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user48@elastica.co';
+        http_headers = [user48: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R49 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user49 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user49@elastica.co';
+        http_headers = [user49: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+Robot R50 = {
+
+        req_methods = [ "POST" ]; // usually more than just POSTs
+        post_contents = [ SimpleContent ];
+	pop_model = { pop_distr = popUnif(); };
+        recurrence = 55% / SimpleContent.cachable; // adjusted to get 55% DHR
+        origins = map.names;      // where the origin servers are
+        dns_resolver = dr;
+        ssl_wraps = [ wrap ];
+        
+        MimeHeader user50 = 'ELASTICA_MAGIC_COOKIE: 986088055194:stresstest.user50@elastica.co';
+        http_headers = [user50: 100%];
+        addresses = ['10.0.15.59' ** 1 ]; // where these robot agents will be created
+};
+// commit to using these servers and robots
+use(S,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,R14,R15,R16,R17,R18,R19,R20,R21,R22,R23,R24,R25,R26,R27,R28,R29,R30,R31,R32,R33,R34,R35,R36,R37,R38,R39,R40,R41,R42,R43,R44,R45,R46,R47,R48,R49,R50);
